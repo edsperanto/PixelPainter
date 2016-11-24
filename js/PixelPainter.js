@@ -46,8 +46,8 @@ var drawMode = 'trace';
 var painting = false;
 var canvas = []; // stores color of each pixel
 
-// iife that creates basic framing
-var mainContainer = (function() {
+// iife that creates basic framing (automatically invoked)
+var page = (function() {
   var outerFrame = document.createElement('div');
   outerFrame.className = 'outer-frame';
 
@@ -71,6 +71,18 @@ var mainContainer = (function() {
   paintGrid.className = 'paint-grid';
   grid.appendChild(paintGrid);
 
+  var buttonErase = document.createElement("button");
+  buttonErase.className = "button-erase";
+  var buttonEraseText = document.createTextNode("Erase");
+  buttonErase.appendChild(buttonEraseText);
+  buttons.appendChild(buttonErase);
+
+  var buttonClear = document.createElement("button");
+  buttonClear.className = "button-clear";
+  var buttonClearText = document.createTextNode("Clear");
+  buttonClear.appendChild(buttonClearText);
+  buttons.appendChild(buttonClear);
+
   document.body.appendChild(outerFrame);
 
   return {
@@ -79,12 +91,34 @@ var mainContainer = (function() {
     palette: palette,
     buttons: buttons,
     grid: grid,
-    paintGrid: paintGrid
+    paintGrid: paintGrid,
+    buttonClear: buttonClear,
+    buttonErase: buttonErase
   };
-});
+})();
 
-// run and assign to variable named 'page'
-var page = mainContainer();
+// generate palette grid (automatically invoked)
+var generatePaletteGrid = (function() {
+  var colors = [["#ff0000", "#ff6a00", "#ffaa00"], ["#fff200", "#2eff00", "#0a7218"], ["#00fff6", "#0050f2", "#cd62ea"], ["#9400ff","#b5b5b5", "#000000"]];
+  var paletteContainer = document.createElement("div");
+  var rowDiv;
+  var columnDiv;
+  var columnNum = 3;
+  var rowNum = 4;
+
+  for(var i = ZERO; i < rowNum; i++){
+    rowDiv = document.createElement("div");
+    paletteContainer.appendChild(rowDiv);
+
+    for(var j = ZERO; j < columnNum; j++){
+      columnDiv = document.createElement("div");
+      columnDiv.className = CLASS.ROW_INIT + (i + INDEX_OFFSET) + CLASS.COLUMN_INIT + (j + INDEX_OFFSET) + SPACE + CLASS.COLORS;
+      columnDiv.style.backgroundColor = colors[i][j];
+      rowDiv.appendChild(columnDiv);
+    }
+  }
+  page.palette.appendChild(paletteContainer);
+})();
 
 // iife that generates paint area
 var genPaintGrid = (function() {
@@ -224,57 +258,12 @@ function savePaintToCanvas(pixel) {
   console.log(pixelClassName);
 }
 
-// generate palette grid
-var generatePaletteGrid = (function() {
-  var tableDiv = document.createElement("div");
-  var colors = [["#ff0000", "#ff6a00", "#ffaa00"], ["#fff200", "#2eff00", "#0a7218"], ["#00fff6", "#0050f2", "#cd62ea"], ["#9400ff","#b5b5b5", "#000000"]];
-  var columnNum = 3;
-  var rowNum = 4;
-
-  for(var i = ZERO; i < rowNum; i++){
-    var rowDiv = document.createElement("div");
-    rowDiv.className = "row";
-    tableDiv.appendChild(rowDiv);
-
-
-    for(var j = ZERO; j < columnNum; j++){
-      var tdDiv = document.createElement("div");
-      tdDiv.className = CLASS.ROW_INIT + (i + INDEX_OFFSET) + CLASS.COLUMN_INIT + (j + INDEX_OFFSET) + SPACE + CLASS.COLORS;
-      tdDiv.style.backgroundColor = colors[i][j];
-      rowDiv.appendChild(tdDiv);
-    }
-  }
-  page.palette.appendChild(tableDiv);
-});
-
-colorPalette = generatePaletteGrid();
-
-//buttons
-var createButtons = (function() {
-  var buttonErase = document.createElement("button");
-  buttonErase.className = "button-erase";
-
-  var buttonEraseText = document.createTextNode("Erase");
-  buttonErase.appendChild(buttonEraseText);
-
-  var buttonClear = document.createElement("button");
-  buttonClear.className = "button-clear";
-
-  var buttonClearText = document.createTextNode("Clear");
-  buttonClear.appendChild(buttonClearText);
-
-  page.buttons.appendChild(buttonErase);
-  page.buttons.appendChild(buttonClear);
-});
-
-toolButtons = createButtons();
-
 // use color palette to select color
 $(CLASS.SELECTOR + CLASS.COLORS).onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
   foregroundColor = this.style.backgroundColor;
 });
 
-// button functions 
+// button functions
 $(".button-clear").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
   console.log("sanity check");
   paint.render();
