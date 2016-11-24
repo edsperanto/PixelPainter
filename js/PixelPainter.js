@@ -83,6 +83,12 @@ var page = (function() {
   buttonClear.appendChild(buttonClearText);
   buttons.appendChild(buttonClear);
 
+  var buttonChange = document.createElement("button");
+  buttonChange.className = "button-change";
+  var buttonChangeText = document.createTextNode("Change");
+  buttonChange.appendChild(buttonChangeText);
+  buttons.appendChild(buttonChange);
+
   document.body.appendChild(outerFrame);
 
   return {
@@ -149,8 +155,11 @@ var genPaintGrid = (function() {
   // generate grid
   function _render() {
     _findCurrentCanvasSize();
-    if(currentHeight !== height && currentWidth !== width) {
+    if(currentHeight < height || currentWidth < width) {
       _makeNewRow();
+      _addListeners();
+    }else if(currentHeight > height || currentWidth > width){
+
     }else{
       _renderFromArray();
     }
@@ -172,32 +181,48 @@ var genPaintGrid = (function() {
       row.className = CLASS.ROW + rowNum + SPACE + CLASS.ROWS;
       page.paintGrid.appendChild(row);
       if(rowNum <= currentHeight) { // for existing rows
-        _makeNewColumn((currentWidth + ONE), width, rowNum, false); // add new columns
+        _makeNewColumn((currentWidth + ONE), rowNum); // add new columns
       }else{ // for new rows
         canvas.push([]);
-        _makeNewColumn(FIRST, width, rowNum, true);
+        _makeNewColumn(FIRST, rowNum);
       }
     }
   }
 
   // generate columns (cells in each row)
-  function _makeNewColumn(startColumnNum, endColumnNum, rowNum, newRow) {
-    var notJumped = true;
+  function _makeNewColumn(startColumnNum, rowNum) {
     var currRow = $(CLASS.SELECTOR + CLASS.ROW + rowNum).item[0];
-    for(var columnNum = startColumnNum; columnNum <= endColumnNum; columnNum++) {
-      if(!newRow && notJumped) {
-        startColumnNum = currentWidth + 1;
-        notJumped = false;
-      }
-      if(newRow) {
-        canvas[rowNum - INDEX_OFFSET].push(COLOR.WHITE);
-      }
+    for(var columnNum = startColumnNum; columnNum <= width; columnNum++) {
       cell = document.createElement('div');
       cell.className =  CLASS.ROW_INIT + rowNum +
                         CLASS.COLUMN_INIT + columnNum +
                         SPACE + CLASS.PIXELS;
       currRow.appendChild(cell);
+      canvas[rowNum - INDEX_OFFSET].push(COLOR.WHITE);
     }
+  }
+
+  // add event listeners
+  function _addListeners() {
+    $('.pixels').onEvent(DEVICES.MOUSE, MOUSE.OVER, function() {
+      draw(this);
+    });
+    $('.pixels').onEvent(DEVICES.MOUSE, MOUSE.DOWN, function() {
+      painting = true;
+      draw(this);
+      painting = false;
+    });
+  }
+
+  // clear everything
+  function _clear() {
+    _findCurrentCanvasSize();
+    for(var rowNum = FIRST; rowNum <= currentHeight; rowNum++) {
+      for(var columnNum = FIRST; columnNum <= currentWidth; columnNum++) {
+        canvas[rowNum - INDEX_OFFSET][columnNum - INDEX_OFFSET] = COLOR.WHITE;
+      }
+    }
+    _render();
   }
 
   // grid location selector
@@ -210,7 +235,8 @@ var genPaintGrid = (function() {
   return {
     grid: _grid,
     importDimensions: _importDimensions,
-    render: _render
+    render: _render,
+    clear: _clear
   };
 });
 
@@ -229,22 +255,14 @@ $('.grid').onEvent(DEVICES.MOUSE, MOUSE.UP, function() {
 $('.grid').onEvent(DEVICES.MOUSE, MOUSE.LEAVE, function() {
   painting = false;
 });
-$('.pixels').onEvent(DEVICES.MOUSE, MOUSE.OVER, function() {
-  draw(this);
-});
-$('.pixels').onEvent(DEVICES.MOUSE, MOUSE.DOWN, function() {
-  painting = true;
-  draw(this);
-  painting = false;
-});
 
 // draw function
-function draw(item) {
+function draw(pixel) {
   switch(drawMode) {
     case 'trace':
       if(painting) {
-        item.style.backgroundColor = foregroundColor;
-        savePaintToCanvas(item);
+        pixel.style.backgroundColor = foregroundColor;
+        savePaintToCanvas(pixel);
       }
       break;
   }
@@ -252,10 +270,37 @@ function draw(item) {
 
 // save to canvas array
 function savePaintToCanvas(pixel) {
-  var pixelRow;
-  var pixelColumn;
-  var pixelClassName = pixel.className;
-  console.log(pixelClassName);
+  var pixelRow = '';
+  var pixelColumn = '';
+  var pixelClassName = pixel.className.substr(1);
+  var rowFound = false;
+
+  while(pixelClassName !== '') {
+    if(_isNum(pixelClassName.charAt(0))) {
+      if(rowFound) {
+        pixelColumn = pixelColumn + pixelClassName.charAt(0);
+      }else{
+        pixelRow = pixelRow + pixelClassName.charAt(0);
+      }
+    }else if(pixelClassName.charAt(0) === 'c') {
+      rowFound = true;
+    }else {
+      pixelClassName = '';
+    }
+    pixelClassName = pixelClassName.substr(1);
+  }
+
+  function _isNum(myChar) {
+    switch(myChar) {
+      case '1': case '2': case '3': case '4': case '5':
+      case '6': case '7': case '8': case '9': case '0':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  canvas[pixelRow - INDEX_OFFSET][pixelColumn - INDEX_OFFSET] = pixel.style.backgroundColor;
 }
 
 // use color palette to select color
@@ -265,10 +310,19 @@ $(CLASS.SELECTOR + CLASS.COLORS).onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() 
 
 // button functions
 $(".button-clear").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
-  console.log("sanity check");
-  paint.render();
+  paint.clear();
 });
 
 $(".button-erase").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
   foregroundColor = COLOR.WHITE;
+});
+
+function changeIt() {
+  paint.importDimensions(150, 150);
+  paint.render();
+}
+
+$(".button-change").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
+  console.log("sanity check");
+  changeIt();
 });
