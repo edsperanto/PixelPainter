@@ -50,6 +50,7 @@ body {
 .paint-grid {
   margin: auto;
   float: left;
+  width: 1000px;
 }
 
 .rows {

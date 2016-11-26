@@ -202,6 +202,9 @@ var genPaintGrid = (function() {
     }
   }
 
+  // delete rows
+
+
   // add event listeners
   function _addListeners() {
     $('.pixels').onEvent(DEVICES.MOUSE, MOUSE.OVER, function() {
@@ -263,6 +266,7 @@ function draw(pixel) {
       if(painting) {
         pixel.style.backgroundColor = foregroundColor;
         savePaintToCanvas(pixel);
+        console.log(pixel);
       }
       break;
   }
@@ -314,12 +318,13 @@ $(".button-clear").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
 });
 
 $(".button-erase").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
-  foregroundColor = COLOR.WHITE;
+  foregroundColor = "rgb(255, 255, 255)";
 });
 
 function changeIt() {
   paint.importDimensions(150, 150);
   paint.render();
+  page.paintGrid.style.width = '2000px';
 }
 
 $(".button-change").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
