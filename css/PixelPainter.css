@@ -1,46 +1,58 @@
 body {
 	background-color: white;
   font-family: "Courier New";
-  font-size: 40px;
+  font-size: 30px;
 }
 
 .outer-frame {
   height: auto;
   width: auto;
+  border-style: solid;
+  border-width: 3px;
 }
 
 .control {
   background-color: gray;
-  height: 100%;
-  width: 300px;
+  height: calc(100% - 6px);
+  width: 245px;
   display: inline-block;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 .grid {
   background-color: #4E4E4E;
-  width: calc(100% - 300px - 20px);
-  height: calc(100% - 20px);
+  height: calc(100% - 20px - 6px);
+  width: calc(100% - 245px - 20px);
   display: inline-block;
   padding: 10px;
   overflow-y: auto;
   cursor: crosshair;
 }
-.palette {
+.pane {
   background-color: white;
   width: calc(100% - 10px);
   margin: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-.color-palette {
+.title-text, .sizer-text, .color-palette, .size-bar {
   padding: 10px;
 }
 
+.title-text {
+  font-size: 50px;
+}
+
+.sizer-text {
+  padding-bottom: 0px;
+}
+
 .palette-name {
-  height: 50px;
+  height: 30px;
   cursor: pointer;
   display: block;
-  vertical-align:
+  padding-bottom: 20px;
 }
 
 .color-box {
@@ -50,12 +62,17 @@ body {
   display: inline-block;
 }
 
+.size-bar {
+  font-size: 20px;
+}
+
 .buttons {
   background-color: white;
   margin: 5px;
   max-width: 100%;
   max-height: 100%;
   padding: 10px;
+  cursor: pointer;
 }
 
 .paint-grid {
@@ -78,4 +95,12 @@ body {
   border: solid 1px black;
   height: 8px;
   width: 8px;
+}
+
+.button-erase, .button-clear, .button-save, .button-load {
+  margin: 5px;
+  text-align: center;
+  border: solid 1px black;
+  background-color: #262626;
+  color: white;
 }

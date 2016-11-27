@@ -12,7 +12,7 @@ var CLASS = {
   FIRST_CELL: 'r1c1',
   ROW: 'row',
   ROWS: 'rows',
-  COLORS: 'colors'
+  COLORS: 'color-box'
 };
 var COLOR = {
   BLACK: '#000000',
@@ -57,8 +57,28 @@ var mainContainer = (function() {
   controlPanel.className = 'control';
   outerFrame.appendChild(controlPanel);
 
+  var title = document.createElement('div');
+  title.className = 'pane';
+  var titleText = document.createElement('div');
+  titleText.className = 'title-text';
+  titleText.innerHTML = '<span>eggs-PAINT</span><br><span style="font-size:14px;">Sponsored by HowToBasic</span>';
+  title.appendChild(titleText);
+  controlPanel.appendChild(title);
+
+  var sizer = document.createElement('div');
+  sizer.className = 'pane';
+  var sizerText = document.createElement('div');
+  sizerText.className = 'sizer-text';
+  sizerText.innerText = 'Size';
+  sizer.appendChild(sizerText);
+  var sizeBar = document.createElement('div');
+  sizeBar.className = 'size-bar';
+  sizeBar.innerHTML = "<span>brush size</span><br><input type=\"range\" id=\"myRange\" value=\"90\"><br><span>pixel size</span><br><input type=\"range\" id=\"myRange\" value=\"20\">";
+  sizer.appendChild(sizeBar);
+  controlPanel.appendChild(sizer);
+
   var palette = document.createElement('div');
-  palette.className = 'palette';
+  palette.className = 'pane';
   controlPanel.appendChild(palette);
 
   var buttons = document.createElement('div');
@@ -123,7 +143,7 @@ var generatePaletteGrid = (function() {
   var colorPalette = document.createElement("div");
   colorPalette.appendChild(colorPaletteName);
   var colorBox;
-  var colorArr = ["#ff0000", "#ff6a00", "#ffaa00", "#fff200", "#2eff00", "#0a7218", "#00fff6", "#0050f2", "#cd62ea", "#9400ff","#b5b5b5", "#000000"];
+  var colorArr = ["#ff0000", "#ff6a00", "#ffaa00", "#fff200", "#2eff00", "#339933", "#3399ff", "#0050f2", "#ff66cc", "#9966ff","#b5b5b5", "#000000"];
 
   for(var i = ZERO; i < colorArr.length; i++){
     colorBox = document.createElement("div");
