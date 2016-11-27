@@ -73,7 +73,7 @@ var mainContainer = (function() {
   sizer.appendChild(sizerText);
   var sizeBar = document.createElement('div');
   sizeBar.className = 'size-bar';
-  sizeBar.innerHTML = "<span>brush size</span><br><input type=\"range\" id=\"myRange\" value=\"90\"><br><span>pixel size</span><br><input type=\"range\" id=\"myRange\" value=\"20\">";
+  sizeBar.innerHTML = "<span>brush size</span><br><input type=\"range\" id=\"brush-size\" value=\"5\"><br><span>pixel size</span><br><input type=\"range\" id=\"pixel-size\" value=\"20\">";
   sizer.appendChild(sizeBar);
   controlPanel.appendChild(sizer);
 
@@ -148,6 +148,7 @@ var generatePaletteGrid = (function() {
   for(var i = ZERO; i < colorArr.length; i++){
     colorBox = document.createElement("div");
     colorBox.className = 'color-box';
+    colorBox.id = 'c' + colorArr[i].substr(1);
     colorBox.style.backgroundColor = colorArr[i];
     colorPalette.appendChild(colorBox);
   }
