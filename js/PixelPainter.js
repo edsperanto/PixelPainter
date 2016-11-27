@@ -45,6 +45,7 @@ var backgroundColor = COLOR.WHITE;
 var drawMode = 'trace';
 var painting = false;
 var canvas = []; // stores color of each pixel
+var changes = '';
 
 // iife that creates basic framing
 var mainContainer = (function() {
@@ -100,6 +101,7 @@ var genPaintGrid = (function() {
   function _importDimensions(newHeight, newWidth) {
     height = newHeight;
     width = newWidth;
+    page.paintGrid.style.width = (width * 10) + 'px';
   }
 
   // check current canvas size
@@ -218,10 +220,28 @@ function draw(item) {
 
 // save to canvas array
 function savePaintToCanvas(pixel) {
-  var pixelRow;
-  var pixelColumn;
+  var getColumn = false;
+  var pixelRow = '';
+  var pixelColumn = '';
   var pixelClassName = pixel.className;
-  console.log(pixelClassName);
+  var tempChar;
+  pixelClassName = pixelClassName.substr(1);
+  for(var i = 0; i < pixelClassName.length; i++) {
+    tempChar = pixelClassName.charAt(i);
+    if(tempChar === SPACE) {
+      i = pixelClassName.length;
+    }
+    if(tempChar === 'c'){
+      getColumn = true;
+    }
+    if(!getColumn) {
+      pixelRow += tempChar;
+    }else{
+      pixelColumn += tempChar;
+    }
+  }
+  pixelColumn = pixelColumn.substr(1);
+  canvas[pixelRow - INDEX_OFFSET][pixelColumn - INDEX_OFFSET] = pixel.style.backgroundColor;
 }
 
 // generate palette grid
@@ -263,8 +283,22 @@ var createButtons = (function() {
   var buttonClearText = document.createTextNode("Clear");
   buttonClear.appendChild(buttonClearText);
 
+  var buttonSave = document.createElement("button");
+  buttonSave.className = "button-save";
+
+  var buttonSaveText = document.createTextNode("Save");
+  buttonSave.appendChild(buttonSaveText);
+
+  var buttonLoad = document.createElement("button");
+  buttonLoad.className = "button-load";
+
+  var buttonLoadText = document.createTextNode("Load");
+  buttonLoad.appendChild(buttonLoadText);
+
   page.buttons.appendChild(buttonErase);
   page.buttons.appendChild(buttonClear);
+  page.buttons.appendChild(buttonSave);
+  page.buttons.appendChild(buttonLoad);
 });
 
 toolButtons = createButtons();
@@ -274,12 +308,64 @@ $(CLASS.SELECTOR + CLASS.COLORS).onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() 
   foregroundColor = this.style.backgroundColor;
 });
 
-// button functions 
+// button functions
 $(".button-clear").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
   console.log("sanity check");
+  for(var i = 0; i < canvas.length; i++) {
+    for(var j = 0; j < canvas[0].length; j++) {
+      canvas[i][j] = COLOR.WHITE;
+    }
+  }
   paint.render();
 });
 
 $(".button-erase").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
   foregroundColor = COLOR.WHITE;
+});
+
+$(".button-save").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
+  addChanges(gridHeight);
+  addChanges(gridWidth);
+  for(var i = 0; i < canvas.length; i++) {
+    for(var j = 0; j < canvas[0].length; j++) {
+      if(canvas[i][j] !== '#ffffff') {
+        addChanges(i + INDEX_OFFSET);
+        addChanges(j + INDEX_OFFSET);
+        addChanges(canvas[i][j]);
+      }
+    }
+  }
+  localStorage.savedCanvas = changes;
+});
+
+function addChanges(str) {
+  changes += str + '|';
+}
+
+$(".button-load").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
+  if(localStorage.savedCanvas) {
+    //clear first
+    for(var r = 0; r < canvas.length; r++) {
+      for(var c = 0; c < canvas[0].length; c++) {
+        canvas[r][c] = COLOR.WHITE;
+      }
+    }
+    paint.render();
+    // load stuff
+    var saved = localStorage.savedCanvas.split('|');
+    var newGridHeight = saved[0] * 1;
+    var newGridWidth = saved[1] * 1;
+    var i = 2;
+    var j = 3;
+    var k = 4;
+    for(i = 2; i < ((saved.length - 2)); i += 3) {
+      canvas[(saved[i] * 1 - INDEX_OFFSET)][(saved[j] * 1 - INDEX_OFFSET)] = saved[k];
+      j += 3;
+      k += 3;
+    }
+    paint.importDimensions(newGridHeight, newGridWidth);
+    paint.render();
+  }else{
+    alert("You don't have any saved drawings!");
+  }
 });
