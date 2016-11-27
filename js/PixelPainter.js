@@ -46,6 +46,7 @@ var drawMode = 'trace';
 var painting = false;
 var canvas = []; // stores color of each pixel
 var changes = '';
+var saved;
 
 // iife that creates basic framing
 var mainContainer = (function() {
@@ -86,6 +87,58 @@ var mainContainer = (function() {
 
 // run and assign to variable named 'page'
 var page = mainContainer();
+
+//buttons
+var createButtons = (function() {
+  var buttonErase = document.createElement("div");
+  buttonErase.className = "button-erase";
+  buttonErase.innerText = "Erase";
+
+  var buttonClear = document.createElement("div");
+  buttonClear.className = "button-clear";
+  buttonClear.innerText = "Clear";
+
+  var buttonSave = document.createElement("div");
+  buttonSave.className = "button-save";
+  buttonSave.innerText = "Save";
+
+  var buttonLoad = document.createElement("div");
+  buttonLoad.className = "button-load";
+  buttonLoad.innerText = "Load";
+
+  page.buttons.appendChild(buttonErase);
+  page.buttons.appendChild(buttonClear);
+  page.buttons.appendChild(buttonSave);
+  page.buttons.appendChild(buttonLoad);
+});
+
+toolButtons = createButtons();
+
+// generate palette grid
+var generatePaletteGrid = (function() {
+  var colorPaletteName = document.createElement("div");
+  colorPaletteName.innerText = "Colors";
+  colorPaletteName.className = "palette-name";
+  page.palette.appendChild(colorPaletteName);
+  var colorPalette = document.createElement("div");
+  colorPalette.appendChild(colorPaletteName);
+  var colorBox;
+  var colorArr = ["#ff0000", "#ff6a00", "#ffaa00", "#fff200", "#2eff00", "#0a7218", "#00fff6", "#0050f2", "#cd62ea", "#9400ff","#b5b5b5", "#000000"];
+
+  for(var i = ZERO; i < colorArr.length; i++){
+    colorBox = document.createElement("div");
+    colorBox.className = 'color-box';
+    colorBox.style.backgroundColor = colorArr[i];
+    colorPalette.appendChild(colorBox);
+  }
+
+  colorPalette.className = 'color-palette';
+  page.palette.appendChild(colorPalette);
+
+  return colorPalette;
+});
+
+colorPalette = generatePaletteGrid();
 
 // iife that generates paint area
 var genPaintGrid = (function() {
@@ -244,65 +297,6 @@ function savePaintToCanvas(pixel) {
   canvas[pixelRow - INDEX_OFFSET][pixelColumn - INDEX_OFFSET] = pixel.style.backgroundColor;
 }
 
-// generate palette grid
-var generatePaletteGrid = (function() {
-  var tableDiv = document.createElement("div");
-  var colors = [["#ff0000", "#ff6a00", "#ffaa00"], ["#fff200", "#2eff00", "#0a7218"], ["#00fff6", "#0050f2", "#cd62ea"], ["#9400ff","#b5b5b5", "#000000"]];
-  var columnNum = 3;
-  var rowNum = 4;
-
-  for(var i = ZERO; i < rowNum; i++){
-    var rowDiv = document.createElement("div");
-    rowDiv.className = "row";
-    tableDiv.appendChild(rowDiv);
-
-
-    for(var j = ZERO; j < columnNum; j++){
-      var tdDiv = document.createElement("div");
-      tdDiv.className = CLASS.ROW_INIT + (i + INDEX_OFFSET) + CLASS.COLUMN_INIT + (j + INDEX_OFFSET) + SPACE + CLASS.COLORS;
-      tdDiv.style.backgroundColor = colors[i][j];
-      rowDiv.appendChild(tdDiv);
-    }
-  }
-  page.palette.appendChild(tableDiv);
-});
-
-colorPalette = generatePaletteGrid();
-
-//buttons
-var createButtons = (function() {
-  var buttonErase = document.createElement("button");
-  buttonErase.className = "button-erase";
-
-  var buttonEraseText = document.createTextNode("Erase");
-  buttonErase.appendChild(buttonEraseText);
-
-  var buttonClear = document.createElement("button");
-  buttonClear.className = "button-clear";
-
-  var buttonClearText = document.createTextNode("Clear");
-  buttonClear.appendChild(buttonClearText);
-
-  var buttonSave = document.createElement("button");
-  buttonSave.className = "button-save";
-
-  var buttonSaveText = document.createTextNode("Save");
-  buttonSave.appendChild(buttonSaveText);
-
-  var buttonLoad = document.createElement("button");
-  buttonLoad.className = "button-load";
-
-  var buttonLoadText = document.createTextNode("Load");
-  buttonLoad.appendChild(buttonLoadText);
-
-  page.buttons.appendChild(buttonErase);
-  page.buttons.appendChild(buttonClear);
-  page.buttons.appendChild(buttonSave);
-  page.buttons.appendChild(buttonLoad);
-});
-
-toolButtons = createButtons();
-
 // use color palette to select color
 $(CLASS.SELECTOR + CLASS.COLORS).onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
   foregroundColor = this.style.backgroundColor;
@@ -352,7 +346,7 @@ $(".button-load").onEvent(DEVICES.MOUSE, MOUSE.CLICK, function() {
     }
     paint.render();
     // load stuff
-    var saved = localStorage.savedCanvas.split('|');
+    saved = localStorage.savedCanvas.split('|');
     var newGridHeight = saved[0] * 1;
     var newGridWidth = saved[1] * 1;
     var i = 2;
